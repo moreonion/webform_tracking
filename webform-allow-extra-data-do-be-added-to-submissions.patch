@@ -1,0 +1,82 @@
+diff --git a/includes/webform.report.inc b/includes/webform.report.inc
+index 56a29db..13bc936 100644
+--- a/includes/webform.report.inc
++++ b/includes/webform.report.inc
+@@ -228,6 +228,8 @@ function theme_webform_results_table($variables) {
+   // to sort the results.
+   $header = theme('webform_results_table_header', array('node' => $node));
+ 
++  $extra_data_results = module_invoke_all('webform_results_extra_data', $submissions);
++
+   // Generate a row for each submission.
+   foreach ($submissions as $sid => $submission) {
+     $cell[] = l($sid, 'node/' . $node->nid . '/submission/' . $sid);
+@@ -246,6 +248,13 @@ function theme_webform_results_table($variables) {
+       }
+     }
+ 
++    foreach ($extra_data_results as $extra_data) {
++      foreach ($extra_data[$sid] as $key => $value) {
++        $component_headers[] = check_plain($key);
++        $cell[] = check_plaion($value);
++      }
++    }
++
+     $rows[] = $cell;
+     unset($cell);
+   }
+@@ -705,6 +714,14 @@ function webform_results_export($node, $format = 'delimited', $options = array()
+     }
+   }
+ 
++  // Get all the required submissions for the download.
++  $filters['nid'] = $node->nid;
++  if (!empty($options['sids'])){
++    $filters['sid'] = $options['sids'];
++  }
++  $submissions = webform_get_submissions($filters);
++  $extra_data_results = module_invoke_all('webform_results_extra_data', $submissions);
++
+   // Open a new Webform exporter object.
+   $exporter = webform_export_create_handler($format, $options);
+ 
+@@ -740,18 +757,19 @@ function webform_results_export($node, $format = 'delimited', $options = array()
+     }
+   }
+ 
++  foreach ($extra_data_results as $extra_data) {
++    foreach (reset($extra_data) as $key => $value) {
++      array_push($header[0], '');
++      array_push($header[1], '');
++      array_push($header[2], $key);
++    }
++  }
++
+   // Add headers to the file.
+   foreach ($header as $row) {
+     $exporter->add_row($handle, $row);
+   }
+ 
+-  // Get all the required submissions for the download.
+-  $filters['nid'] = $node->nid;
+-  if (!empty($options['sids'])){
+-    $filters['sid'] = $options['sids'];
+-  }
+-  $submissions = webform_get_submissions($filters);
+-
+   // Generate a row for each submission.
+   $row_count = 0;
+   $sid = 0;
+@@ -802,6 +820,12 @@ function webform_results_export($node, $format = 'delimited', $options = array()
+       }
+     }
+ 
++    foreach ($extra_data_results as $extra_data) {
++      foreach ($extra_data[$sid] as $key => $value) {
++        $row[] = $value;
++      }
++    }
++
+     // Write data from submissions.
+     $data = $exporter->add_row($handle, $row);
+   }

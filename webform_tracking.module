@@ -1,0 +1,172 @@
+<?php
+/**
+ * @file
+ * Adds user-tracking capabilities to webform.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function webform_tracking_form_webform_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $form['webform_tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Webform Tracking'),
+    '#collapsible' => TRUE,
+    '#weight' => 10,
+  );
+
+  $form['webform_tracking']['webform_tracking_respect_dnt'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Respect <a href="http://www.mozilla.org/en-US/dnt/">Do Not Track</a>'),
+    '#default_value' => variable_get('webform_tracking_respect_dnt', TRUE),
+  );
+
+  array_unshift($form['#submit'], 'webform_tracking_webform_admin_settings_submit');
+}
+
+/**
+ * Submit handler to set the variable 'webform_tracking_respect_dnt'.
+ */
+function webform_tracking_webform_admin_settings_submit(&$form, &$form_state) {
+  variable_set('webform_tracking_respect_dnt', $form_state['values']['webform_tracking_respect_dnt']);
+}
+
+
+/**
+ * Implements hook_boot().
+ */
+function webform_tracking_boot() {
+  // Do not track if Do-Not-Track (DNT) is set, but ignore IE 10 as it sends
+  // DNT by default and thus undermindes the concept.
+  $ua = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+  if (empty($_SERVER['HTTP_DNT'])
+      || preg_match('/MSIE\s*10/', $ua)
+    || !variable_get('webform_tracking_respect_dnt', TRUE)) {
+    // We need the session_cache module alreay loaded.
+    drupal_load('module', 'session_cache');
+
+    $tags = unserialize(session_cache_get('webform_tracking_tags'));
+    if (empty($tags)) {
+      $tags = array();
+    }
+    foreach (['tag', 'tags'] as $parameter) {
+      if (isset($_GET[$parameter])) {
+        $tags = array_merge($tags, explode(",", check_plain($_GET[$parameter])));
+      }
+    }
+    session_cache_set('webform_tracking_tags', serialize(array_unique($tags)));
+
+    // If the referer does not start with $base_url, it's external but we
+    // only take the first external referer to avoid problems with off-site-
+    // redirects (e.g. in payment forms).
+    if (isset($_SERVER['HTTP_REFERER']) &&
+      strpos($_SERVER['HTTP_REFERER'], $GLOBALS['base_url']) !== 0 &&
+      !session_cache_get('webform_tracking_external_referer')) {
+      session_cache_set('webform_tracking_external_referer', $_SERVER['HTTP_REFERER']);
+    }
+
+    $history = session_cache_get('webform_tracking_history');
+    if (empty($history)) {
+      $history = array();
+    }
+    $length = array_push($history, $GLOBALS['base_url'] . '/' . $_GET['q']);
+    if ($length > 10) {
+      // If the history is getting too long, we need at least the following:
+      // [0] is the entry page
+      // [-3] might be the last page before the form == referer
+      // [-2] might be the form
+      // [-1] might be the forms /done page
+      // 10 is an arbitrary value, you just might want to avoid calling
+      // the array functions below on every request if not necessary.
+      $history = array_merge(array($history[0]), array_slice($history, -3));
+    }
+    session_cache_set('webform_tracking_history', $history);
+
+    session_cache_set('webform_tracking_ip_address', ip_address());
+
+    $extra_parameters = array("source", "medium", "version", "other");
+    foreach ($extra_parameters as $name) {
+      if (!empty($_GET[$name])) {
+        session_cache_set('webform_tracking_' . $name, check_plain($_GET[$name]));
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_webform_submission_insert().
+ *
+ * Save tracking data along with the submission
+ */
+function webform_tracking_webform_submission_insert($node, $submission) {
+  $parameters = array(
+    'tags' => '',
+    'ip_address' => '',
+    'external_referer' => '',
+    'source' => '',
+    'medium' => '',
+    'version' => '',
+    'other' => '',
+  );
+  foreach ($parameters as $name => $value) {
+    $parameters[$name] = check_plain(session_cache_get('webform_tracking_' . $name));
+    session_cache_set('webform_tracking_' . $name, NULL);
+  }
+
+  $history = session_cache_get('webform_tracking_history');
+  $length = count($history);
+  session_cache_set('webform_tracking_history', NULL);
+  $urls = array(
+    'entry_url' => $history[0],
+    // The only situation when $history should be < 3 appears if the user opens
+    // the form directly, in this case referer and form_url are the same.
+    'referer'   => isset($history[$length - 3]) ? $history[$length - 3] : $history[0],
+    'form_url'  => isset($history[$length - 2]) ? $history[$length - 2] : $history[0],
+  );
+
+  db_insert('webform_tracking')
+    ->fields(
+      array_merge(
+        array(
+          "nid"     => $submission->nid,
+          "sid"     => $submission->sid,
+          "user_id" => session_cache_get_sid(),
+        ),
+        $urls,
+        $parameters
+      ))->execute();
+}
+
+/**
+ * Implements hook_webform_submission_delete().
+ */
+function webform_tracking_webform_submission_delete($node, $submission) {
+  db_delete('webform_tracking')
+    ->condition('nid', $node->nid)
+    ->condition('sid', $submission->sid)
+    ->execute();
+}
+
+/**
+ * Implements hook_webform_results_extra_data().
+ *
+ * You need the a patch from https://drupal.org/node/2117285 to see
+ * tracking data in the web interface.
+ */
+function webform_tracking_webform_results_extra_data($submissions) {
+  $sids = array_keys($submissions);
+  $tracking_data = db_select('webform_tracking', 't')
+    ->fields('t')
+    ->condition('sid', $sids, 'IN')
+    ->execute()
+    ->fetchAllAssoc('sid');
+  foreach ($tracking_data as $data) {
+    unset($data->nid);
+    unset($data->sid);
+    $data->tags = implode(', ', unserialize($data->tags));
+  }
+
+  // We need that, because module_invoke_all merges the results of all
+  // implementations, so we use the keys (== sids).
+  return array($tracking_data);
+}
