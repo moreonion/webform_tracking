@@ -84,6 +84,11 @@ function webform_tracking_boot() {
 
     session_cache_set('webform_tracking_ip_address', ip_address());
 
+    if (function_exists('geoip_country_name_by_name')) {
+      $country = geoip_country_name_by_name(ip_address());
+      session_cache_set('webform_tracking_country', $country);
+    }
+
     $extra_parameters = array("source", "medium", "version", "other");
     foreach ($extra_parameters as $name) {
       if (!empty($_GET[$name])) {
@@ -107,6 +112,7 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     'medium' => '',
     'version' => '',
     'other' => '',
+    'country' => '',
   );
   foreach ($parameters as $name => $value) {
     $parameters[$name] = check_plain(session_cache_get('webform_tracking_' . $name));

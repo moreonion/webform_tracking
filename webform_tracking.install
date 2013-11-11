@@ -92,6 +92,12 @@ function webform_tracking_schema() {
           'length'      => '1024',
           'not null'    => FALSE,
         ),
+        'country'     => array(
+          'description' => 'the country geoip gives us for this user',
+          'type'        => 'text',
+          'length'      => '1024',
+          'not null'    => FALSE,
+        ),
       ),
       'primary key' => array('nid', 'sid'),
     ),
@@ -99,6 +105,8 @@ function webform_tracking_schema() {
 }
 
 /**
+ * Implements hook_update_n().
+ *
  * Enable session_cache module as replacement for core caching.
  */
 function webform_tracking_update_1() {
@@ -106,6 +114,8 @@ function webform_tracking_update_1() {
 }
 
 /**
+ * Implements hook_update_n().
+ *
  * Add fields for additional tracking data.
  */
 function webform_tracking_update_2() {
@@ -155,6 +165,8 @@ function webform_tracking_update_2() {
 
 
 /**
+ * Implements hook_update_n().
+ *
  * Rename fields for spelling and consistency reasons.
  */
 function webform_tracking_update_3() {
@@ -179,6 +191,20 @@ function webform_tracking_update_3() {
       'description' => 'first page a user visited',
       'type'        => 'text',
       'size'      => 'medium',
+      'not null'    => FALSE,
+    ));
+}
+
+/**
+ * Implements hook_update_n()
+ *
+ * Add a field for the users country. Function depends on geoip PECL module.
+ */
+function webform_tracking_update_4() {
+  db_add_field('webform_tracking', 'country', array(
+      'description' => 'the country geoip gives us for this user',
+      'type'        => 'text',
+      'length'      => '1024',
       'not null'    => FALSE,
     ));
 }
