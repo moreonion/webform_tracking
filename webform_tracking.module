@@ -85,7 +85,8 @@ function webform_tracking_boot() {
     session_cache_set('webform_tracking_ip_address', ip_address());
 
     if (function_exists('geoip_country_name_by_name')) {
-      $country = geoip_country_name_by_name(ip_address());
+      // use @, see: https://bugs.php.net/bug.php?id=59753
+      $country = @geoip_country_name_by_name(ip_address());
       session_cache_set('webform_tracking_country', $country);
     }
 
