@@ -94,8 +94,8 @@ function webform_tracking_schema() {
         ),
         'country'     => array(
           'description' => 'the country geoip gives us for this user',
-          'type'        => 'text',
-          'length'      => '1024',
+          'type'        => 'varchar',
+          'length'      => '2',
           'not null'    => FALSE,
         ),
       ),
@@ -205,6 +205,22 @@ function webform_tracking_update_4() {
       'description' => 'the country geoip gives us for this user',
       'type'        => 'text',
       'length'      => '1024',
+      'not null'    => FALSE,
+    ));
+}
+
+/**
+ * Resize country field to only save iso3166 country codes.
+ */
+function webform_tracking_update_5() {
+  // delete old data
+  db_query('UPDATE {webform_tracking} SET country=?', array(''));
+
+  db_change_field('webform_tracking', 'country', 'country',
+    array(
+      'description' => 'the country geoip gives us for this user',
+      'type'        => 'varchar',
+      'length'      => '2',
       'not null'    => FALSE,
     ));
 }
