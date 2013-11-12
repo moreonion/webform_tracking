@@ -18,7 +18,7 @@ index 56a29db..13bc936 100644
 +    foreach ($extra_data_results as $extra_data) {
 +      foreach ($extra_data[$sid] as $key => $value) {
 +        $component_headers[] = check_plain($key);
-+        $cell[] = check_plaion($value);
++        $cell[] = check_plain($value);
 +      }
 +    }
 +
