@@ -49,7 +49,7 @@ function webform_tracking_boot() {
     if (empty($tags)) {
       $tags = array();
     }
-    foreach (['tag', 'tags'] as $parameter) {
+    foreach (array('tag', 'tags') as $parameter) {
       if (isset($_GET[$parameter])) {
         $tags = array_merge($tags, explode(",", check_plain($_GET[$parameter])));
       }
