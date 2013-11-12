@@ -69,16 +69,18 @@ function webform_tracking_boot() {
     if (empty($history)) {
       $history = array();
     }
-    $length = array_push($history, $GLOBALS['base_url'] . '/' . $_GET['q']);
-    if ($length > 10) {
-      // If the history is getting too long, we need at least the following:
-      // [0] is the entry page
-      // [-3] might be the last page before the form == referer
-      // [-2] might be the form
-      // [-1] might be the forms /done page
-      // 10 is an arbitrary value, you just might want to avoid calling
-      // the array functions below on every request if not necessary.
-      $history = array_merge(array($history[0]), array_slice($history, -3));
+    if ($_GET['q'] !== 'system/ajax') { // works with webform_ajax.
+      $length = array_push($history, $GLOBALS['base_url'] . '/' . $_GET['q']);
+      if ($length > 10) {
+        // If the history is getting too long, we need at least the following:
+        // [0] is the entry page
+        // [-3] might be the last page before the form == referer
+        // [-2] might be the form
+        // [-1] might be the forms /done page
+        // 10 is an arbitrary value, you just might want to avoid calling
+        // the array functions below on every request if not necessary.
+        $history = array_merge(array($history[0]), array_slice($history, -3));
+      }
     }
     session_cache_set('webform_tracking_history', $history);
 
