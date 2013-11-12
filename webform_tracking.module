@@ -170,7 +170,9 @@ function webform_tracking_webform_results_extra_data($submissions) {
   foreach ($tracking_data as $data) {
     unset($data->nid);
     unset($data->sid);
-    $data->tags = implode(', ', unserialize($data->tags));
+    if (!empty($data->tags)) {
+      $data->tags = implode(', ', unserialize($data->tags));
+    }
   }
 
   // We need that, because module_invoke_all merges the results of all
