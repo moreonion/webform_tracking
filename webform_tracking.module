@@ -93,9 +93,19 @@ function webform_tracking_boot() {
     }
 
     $extra_parameters = array("source", "medium", "version", "other");
+    $extra_parameters_alias_mapping = array(
+      "source" => "s",
+      "medium" => "m",
+      "version" => "v",
+      "other" => "o"
+    );
     foreach ($extra_parameters as $name) {
-      if (!empty($_GET[$name])) {
-        session_cache_set('webform_tracking_' . $name, check_plain($_GET[$name]));
+      $alias = $extra_parameters_alias_mapping[$name];
+      $value = NULL;
+      $value = !empty($_GET[$alias]) ? $_GET[$alias] : $value;
+      $value = !empty($_GET[$name])  ? $_GET[$name]  : $value;
+      if (!empty($value)) {
+        session_cache_set('webform_tracking_' . $name, check_plain($value));
       }
     }
   }
