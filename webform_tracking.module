@@ -164,6 +164,9 @@ function webform_tracking_webform_submission_delete($node, $submission) {
  */
 function webform_tracking_webform_results_extra_data($submissions) {
   $sids = array_keys($submissions);
+  if (empty($sids)) {
+    return;
+  }
   $tracking_data = db_select('webform_tracking', 't')
     ->fields('t')
     ->condition('sid', $sids, 'IN')
