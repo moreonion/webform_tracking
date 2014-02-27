@@ -112,6 +112,26 @@ function webform_tracking_boot() {
 }
 
 /**
+ * Add tracking data to submissions objects in $submission->tracking.
+ *
+ * @param mixed $submission
+ *   A webform submission object or an array of webform submission objects
+ *   keyed by their sid.
+ */
+function webform_tracking_load($submissions) {
+  if (is_object($submissions)) {
+    $submissions = array($submissions->sid => $submissions);
+  }
+  $result = db_select('webform_tracking', 't')
+    ->fields('t')
+    ->condition('sid', array_keys($submissions), 'IN')
+    ->execute();
+  foreach ($result as $row) {
+    $submissions[$row->sid]->tracking = $row;
+  }
+}
+
+/**
  * Implements hook_webform_submission_insert().
  *
  * Save tracking data along with the submission
@@ -143,17 +163,14 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     'form_url'  => isset($history[$length - 2]) ? $history[$length - 2] : $history[0],
   );
 
-  db_insert('webform_tracking')
-    ->fields(
-      array_merge(
-        array(
-          "nid"     => $submission->nid,
-          "sid"     => $submission->sid,
-          "user_id" => session_cache_get_sid(),
-        ),
-        $urls,
-        $parameters
-      ))->execute();
+  $data = array(
+    'nid' => $submission->nid,
+    'sid' => $submission->sid,
+    'user_id' => session_cache_get_sid()
+  ) + $urls + $parameters;
+  $submission->tracking = (object) $data;
+
+  db_insert('webform_tracking')->fields($data)->execute();
 }
 
 /**
