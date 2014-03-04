@@ -59,10 +59,15 @@ function webform_tracking_boot() {
     // If the referer does not start with $base_url, it's external but we
     // only take the first external referer to avoid problems with off-site-
     // redirects (e.g. in payment forms).
-    if (isset($_SERVER['HTTP_REFERER']) &&
-      strpos($_SERVER['HTTP_REFERER'], $GLOBALS['base_url']) !== 0 &&
-      !session_cache_get('webform_tracking_external_referer')) {
-      session_cache_set('webform_tracking_external_referer', $_SERVER['HTTP_REFERER']);
+    // if no referer is send, check if we got one via the GET-parameters
+    if(!session_cache_get('webform_tracking_external_referer')) {
+      if (isset($_SERVER['HTTP_REFERER']) &&
+        strpos($_SERVER['HTTP_REFERER'], $GLOBALS['base_url']) !== 0) {
+        session_cache_set('webform_tracking_external_referer', $_SERVER['HTTP_REFERER']);
+      } elseif (!empty($_GET['external_referer']) &&
+        strpos($_GET['external_referer'], $GLOBALS['base_url']) !== 0) {
+        session_cache_set('webform_tracking_external_referer', $_GET['external_referer']);
+      }
     }
 
     $history = session_cache_get('webform_tracking_history');
