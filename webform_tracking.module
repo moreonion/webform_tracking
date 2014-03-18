@@ -46,9 +46,10 @@ function webform_tracking_boot() {
   // Do not track if Do-Not-Track (DNT) is set, but ignore IE 10 as it sends
   // DNT by default and thus undermindes the concept.
   $ua = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-  if (empty($_SERVER['HTTP_DNT'])
-      || preg_match('/MSIE\s*10/', $ua)
-    || !variable_get('webform_tracking_respect_dnt', TRUE)) {
+  $respect_dnt = !preg_match('/MSIE\s*10/', $ua)
+    && variable_get('webform_tracking_respect_dnt', TRUE);
+
+  if (empty($_SERVER['HTTP_DNT']) || !$respect_dnt) {
     // We need the session_cache module alreay loaded.
     drupal_load('module', 'session_cache');
 
