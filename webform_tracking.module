@@ -6,6 +6,9 @@
 
 /**
  * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds an option to decide if DNT should be respected to webforms admin
+ * settings.
  */
 function webform_tracking_form_webform_admin_settings_alter(&$form, &$form_state, $form_id) {
   $form['webform_tracking'] = array(
@@ -34,6 +37,10 @@ function webform_tracking_webform_admin_settings_submit(&$form, &$form_state) {
 
 /**
  * Implements hook_boot().
+ *
+ * Check if we should track the user at all. If so, put the data in the
+ * session_cache for later consumption in
+ * webform_tracking_webform_submission_insert().
  */
 function webform_tracking_boot() {
   // Do not track if Do-Not-Track (DNT) is set, but ignore IE 10 as it sends
@@ -182,6 +189,8 @@ function webform_tracking_webform_submission_insert($node, $submission) {
 
 /**
  * Implements hook_webform_submission_delete().
+ *
+ * Delete tracking data when the corresponding submission is deleted.
  */
 function webform_tracking_webform_submission_delete($node, $submission) {
   db_delete('webform_tracking')
@@ -194,7 +203,8 @@ function webform_tracking_webform_submission_delete($node, $submission) {
  * Implements hook_webform_results_extra_data().
  *
  * You need the a patch from https://drupal.org/node/2117285 to see
- * tracking data in the web interface.
+ * tracking data in the web interface. If you use the patch, tracking data
+ * gets displayed in webforms result table and is included in the csv export.
  */
 function webform_tracking_webform_results_extra_data($submissions) {
   $sids = array_keys($submissions);
