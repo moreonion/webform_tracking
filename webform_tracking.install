@@ -196,7 +196,7 @@ function webform_tracking_update_3() {
 }
 
 /**
- * Implements hook_update_n()
+ * Implements hook_update_n().
  *
  * Add a field for the users country. Function depends on geoip PECL module.
  */
@@ -213,7 +213,7 @@ function webform_tracking_update_4() {
  * Resize country field to only save iso3166 country codes.
  */
 function webform_tracking_update_5() {
-  // delete old data
+  // Delete old data.
   db_query('UPDATE {webform_tracking} SET country=?', array(''));
 
   db_change_field('webform_tracking', 'country', 'country',
