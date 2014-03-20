@@ -1,21 +1,24 @@
 diff --git a/includes/webform.report.inc b/includes/webform.report.inc
-index 56a29db..13bc936 100644
+index 56a29db..299f277 100644
 --- a/includes/webform.report.inc
 +++ b/includes/webform.report.inc
-@@ -228,6 +228,8 @@ function theme_webform_results_table($variables) {
-   // to sort the results.
+@@ -180,8 +180,10 @@ function webform_results_table($node, $pager_count = 0) {
    $header = theme('webform_results_table_header', array('node' => $node));
+   $submissions = webform_get_submissions($node->nid, $header, $pager_count);
+   $total_count = webform_get_submission_count($node->nid);
++  $extra_data = module_invoke_all('webform_results_extra_data', $submissions);
  
-+  $extra_data_results = module_invoke_all('webform_results_extra_data', $submissions);
+-  $output = theme('webform_results_table', array('node' => $node, 'components' => $node->webform['components'], 'submissions' => $submissions, 'total_count' => $total_count, 'pager_count' => $pager_count));
 +
-   // Generate a row for each submission.
-   foreach ($submissions as $sid => $submission) {
-     $cell[] = l($sid, 'node/' . $node->nid . '/submission/' . $sid);
++  $output = theme('webform_results_table', array('node' => $node, 'components' => $node->webform['components'], 'submissions' => $submissions, 'extra_data' => $extra_data, 'total_count' => $total_count, 'pager_count' => $pager_count));
+   if ($pager_count) {
+     $output .= theme('pager');
+   }
 @@ -246,6 +248,13 @@ function theme_webform_results_table($variables) {
        }
      }
  
-+    foreach ($extra_data_results as $extra_data) {
++    foreach ($variables['extra_data'] as $extra_data) {
 +      foreach ($extra_data[$sid] as $key => $value) {
 +        $component_headers[] = check_plain($key);
 +        $cell[] = check_plain($value);
@@ -80,3 +83,16 @@ index 56a29db..13bc936 100644
      // Write data from submissions.
      $data = $exporter->add_row($handle, $row);
    }
+diff --git a/webform.module b/webform.module
+index 1bdf84c..d7d7586 100644
+--- a/webform.module
++++ b/webform.module
+@@ -623,7 +623,7 @@ function webform_theme() {
+       'file' => 'includes/webform.report.inc',
+     ),
+     'webform_results_table' => array(
+-      'variables' => array('node' => NULL, 'components' => NULL, 'submissions' => NULL, 'node' => NULL, 'total_count' => NULL, 'pager_count' => NULL),
++      'variables' => array('node' => NULL, 'components' => NULL, 'submissions' => NULL, 'extra_data' => NULL, 'node' => NULL, 'total_count' => NULL, 'pager_count' => NULL),
+       'file' => 'includes/webform.report.inc',
+     ),
+     'webform_results_download_range' => array(
