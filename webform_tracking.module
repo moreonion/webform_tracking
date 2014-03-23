@@ -73,9 +73,11 @@ function webform_tracking_boot() {
         strpos($_SERVER['HTTP_REFERER'], $GLOBALS['base_url']) !== 0) {
         session_cache_set('webform_tracking_external_referer', $_SERVER['HTTP_REFERER']);
       }
-      elseif (!empty($_GET['external_referer']) &&
-        strpos($_GET['external_referer'], $GLOBALS['base_url']) !== 0) {
-        session_cache_set('webform_tracking_external_referer', $_GET['external_referer']);
+      elseif (!empty($_GET['external_referer'])) {
+        $external_referer = check_plain($_GET['external_referer']);
+        if (strpos($external_referer, $GLOBALS['base_url']) !== 0) {
+          session_cache_set('webform_tracking_external_referer', $external_referer);
+        }
       }
     }
 
@@ -85,7 +87,7 @@ function webform_tracking_boot() {
     }
     // Works with webform_ajax.
     if ($_GET['q'] !== 'system/ajax') {
-      $length = array_push($history, $GLOBALS['base_url'] . '/' . $_GET['q']);
+      $length = array_push($history, $GLOBALS['base_url'] . '/' . check_plain($_GET['q']));
       if ($length > 10) {
         // If the history is getting too long, we need at least the following:
         // [0] is the entry page
