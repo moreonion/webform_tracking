@@ -208,6 +208,62 @@ function webform_tracking_webform_submission_delete($node, $submission) {
 }
 
 /**
+ * Implements hook_webform_submission_load().
+ */
+function webform_tracking_webform_submission_load(&$submissions) {
+  $sids = array_keys($submissions);
+  if (empty($sids)) {
+    return;
+  }
+  $result = db_select('webform_tracking', 't')
+    ->fields('t')
+    ->condition('sid', $sids, 'IN')
+    ->execute();
+  foreach ($result as $data) {
+    $sid = $data->sid;
+    unset($data->nid);
+    unset($data->sid);
+    $data->tags = empty($data->tags) ? array() : unserialize($data->tags);
+    $submissions[$sid]->tracking = $data;
+  }
+}
+
+/**
+ * Implements hook_webform_results_download_submission_information_info().
+ */
+function webform_tracking_webform_results_download_submission_information_info() {
+  $p = 'webform_tracking_';
+  return array(
+    $p . 'referer' => t('Referer'),
+    $p . 'external_referer' => t('External referer'),
+    $p . 'form_url' => t('Form URL'),
+    $p . 'tags' => t('Tags'),
+    $p . 'entry_url' => t('Entry URL'),
+    $p . 'source' => t('Source'),
+    $p . 'medium' => t('Channel'),
+    $p . 'version' => t('Version'),
+    $p . 'other' => t('Other'),
+    $p . 'user_id' => t('User-ID'),
+    $p . 'country' => t('Country'),
+  );
+}
+
+/**
+ * Implements hook_webform_results_download_submission_information_data().
+ */
+function webform_tracking_webform_results_download_submission_information_data($submission, array $options, $serial_start, $row_count) {
+  $data = array();
+  $p = 'webform_tracking_';
+  foreach ($submission->tracking as $key => $value) {
+    $data[$p . $key] = $value;
+  }
+  if (isset($data[$p . 'tags'])) {
+    $data[$p . 'tags'] = implode(', ', $data[$p . 'tags']);
+  }
+  return $data;
+}
+
+/**
  * Implements hook_webform_results_extra_data().
  *
  * You need the a patch from https://drupal.org/node/2117285 to see
