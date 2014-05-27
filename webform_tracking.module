@@ -252,6 +252,9 @@ function webform_tracking_webform_results_download_submission_information_info()
  * Implements hook_webform_results_download_submission_information_data().
  */
 function webform_tracking_webform_results_download_submission_information_data($submission, array $options, $serial_start, $row_count) {
+  if (!isset($submission->tracking)) {
+    return;
+  }
   $data = array();
   $p = 'webform_tracking_';
   foreach ($submission->tracking as $key => $value) {
@@ -261,34 +264,4 @@ function webform_tracking_webform_results_download_submission_information_data($
     $data[$p . 'tags'] = implode(', ', $data[$p . 'tags']);
   }
   return $data;
-}
-
-/**
- * Implements hook_webform_results_extra_data().
- *
- * You need the a patch from https://drupal.org/node/2117285 to see
- * tracking data in the web interface. If you use the patch, tracking data
- * gets displayed in webforms result table and is included in the csv export.
- */
-function webform_tracking_webform_results_extra_data($submissions) {
-  $sids = array_keys($submissions);
-  if (empty($sids)) {
-    return;
-  }
-  $tracking_data = db_select('webform_tracking', 't')
-    ->fields('t')
-    ->condition('sid', $sids, 'IN')
-    ->execute()
-    ->fetchAllAssoc('sid');
-  foreach ($tracking_data as $data) {
-    unset($data->nid);
-    unset($data->sid);
-    if (!empty($data->tags)) {
-      $data->tags = implode(', ', unserialize($data->tags));
-    }
-  }
-
-  // We need that, because module_invoke_all merges the results of all
-  // implementations, so we use the keys (== sids).
-  return array($tracking_data);
 }
