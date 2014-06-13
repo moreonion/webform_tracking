@@ -109,16 +109,28 @@ function webform_tracking_boot() {
       session_cache_set('webform_tracking_country', $country);
     }
 
-    $extra_parameters = array("source", "medium", "version", "other");
+    $extra_parameters = array(
+        "source", "medium", "version", "other", "term", "campaign");
     $extra_parameters_alias_mapping = array(
       "source" => "s",
       "medium" => "m",
       "version" => "v",
       "other" => "o",
+      "term" => "t",
+      "campaign" => "c",
+    );
+    $google_analytics = array(
+      "source"   => "utm_source",
+      "medium"   => "utm_medium",
+      "term"     => "utm_term",
+      "version"  => "utm_content",
+      "campaign" => "utm_campaign",
     );
     foreach ($extra_parameters as $name) {
       $alias = $extra_parameters_alias_mapping[$name];
+      $google = array_key_exists($name, $google_analytics) && $google_analytics[$name];
       $value = NULL;
+      $value = !empty($_GET[$google]) ? $_GET[$google] : $value;
       $value = !empty($_GET[$alias]) ? $_GET[$alias] : $value;
       $value = !empty($_GET[$name]) ? $_GET[$name] : $value;
       if (!empty($value)) {
@@ -163,6 +175,8 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     'version' => '',
     'other' => '',
     'country' => '',
+    'term' => '',
+    'campaign' => '',
   );
   foreach ($parameters as $name => $value) {
     $parameters[$name] = session_cache_get('webform_tracking_' . $name);
@@ -245,6 +259,8 @@ function webform_tracking_webform_results_download_submission_information_info()
     $p . 'other' => t('Other'),
     $p . 'user_id' => t('User-ID'),
     $p . 'country' => t('Country'),
+    $p . 'term' => t('Terms'),
+    $p . 'campaign' => t('Campaign'),
   );
 }
 

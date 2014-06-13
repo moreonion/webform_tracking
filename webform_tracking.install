@@ -156,6 +156,18 @@ function webform_tracking_update_2() {
       'length'      => '1024',
       'not null'    => FALSE,
     ),
+    'term'        => array(
+      'description' => 'keywords for an ad',
+      'type'        => 'text',
+      'length'      => '1024',
+      'not null'    => FALSE,
+    ),
+    'campaign'    => array(
+      'description' => 'name of the current campaign.',
+      'type'        => 'text',
+      'length'      => '1024',
+      'not null'    => FALSE,
+    ),
   );
 
   foreach ($new_fields as $name => $spec) {
@@ -224,3 +236,24 @@ function webform_tracking_update_5() {
       'not null'    => FALSE,
     ));
 }
+
+/**
+ * Implements hook_update_n().
+ *
+ * Even more data to track. Term & Campaign.
+ */
+function webform_tracking_update_6() {
+  db_add_field('webform_tracking', 'term', array(
+    'description' => 'keywords for an ad',
+    'type'        => 'text',
+    'length'      => '1024',
+    'not null'    => FALSE,
+  ));
+  db_add_field('webform_tracking', 'campaign', array(
+    'description' => 'name of the current campaign.',
+    'type'        => 'text',
+    'length'      => '1024',
+    'not null'    => FALSE,
+  ));
+}
+
