@@ -128,7 +128,9 @@ function webform_tracking_boot() {
     );
     foreach ($extra_parameters as $name) {
       $alias = $extra_parameters_alias_mapping[$name];
-      $google = array_key_exists($name, $google_analytics) && $google_analytics[$name];
+      if (array_key_exists($name, $google_analytics)) {
+        $google = $google_analytics[$name];
+      }
       $value = NULL;
       $value = !empty($_GET[$google]) ? $_GET[$google] : $value;
       $value = !empty($_GET[$alias]) ? $_GET[$alias] : $value;
