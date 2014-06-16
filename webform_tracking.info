@@ -4,4 +4,4 @@ package = Webform
 core = 7.x
 
 dependencies[] = webform
-dependencies[] = session_cache
+
