@@ -98,6 +98,18 @@ function webform_tracking_schema() {
           'length'      => '2',
           'not null'    => FALSE,
         ),
+        'term'        => array(
+          'description' => 'keywords for an ad',
+          'type'        => 'text',
+          'length'      => '1024',
+          'not null'    => FALSE,
+        ),
+        'campaign'    => array(
+          'description' => 'name of the current campaign.',
+          'type'        => 'text',
+          'length'      => '1024',
+          'not null'    => FALSE,
+        ),
       ),
       'primary key' => array('nid', 'sid'),
     ),
@@ -152,18 +164,6 @@ function webform_tracking_update_2() {
     ),
     'user_id'     => array(
       'description' => 'unique identification of a person',
-      'type'        => 'text',
-      'length'      => '1024',
-      'not null'    => FALSE,
-    ),
-    'term'        => array(
-      'description' => 'keywords for an ad',
-      'type'        => 'text',
-      'length'      => '1024',
-      'not null'    => FALSE,
-    ),
-    'campaign'    => array(
-      'description' => 'name of the current campaign.',
       'type'        => 'text',
       'length'      => '1024',
       'not null'    => FALSE,
@@ -256,4 +256,3 @@ function webform_tracking_update_6() {
     'not null'    => FALSE,
   ));
 }
-
