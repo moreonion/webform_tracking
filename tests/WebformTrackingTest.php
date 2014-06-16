@@ -30,15 +30,15 @@ class WebformTrackingTest extends DrupalSeleniumTestCase {
     public function testAccessAnonymizedData() {
         $last_nid = $this->getLastWebformNid();
         $this->login();
-        $form_url = $GLOBALS['base_url'] . '/node/' . $last_nid; 
+        $form_url = $GLOBALS['base_url'] . '/node/' . $last_nid;
         $data = array(
             'User' => 'XXXXX XXXXX',
             'IP Address' => 'XXX.XXX.XXX.XXX',
-            'Referer' => $form_url, 
+            'Referer' => $form_url,
             'External referer' => '',
-            'Form URL' => $form_url, 
-            'Tags' => '', 
-            'Entry URL' => $form_url,  
+            'Form URL' => $form_url,
+            'Tags' => '',
+            'Entry URL' => $form_url,
             'Source' => '',
             'Channel' => '',
             'Version' => '',
@@ -52,15 +52,15 @@ class WebformTrackingTest extends DrupalSeleniumTestCase {
     public function testAccessFullData() {
         $last_nid = $this->getLastWebformNid();
         $this->login();
-        $form_url = $GLOBALS['base_url'] . '/node/' . $last_nid; 
+        $form_url = $GLOBALS['base_url'] . '/node/' . $last_nid;
         $data = array(
             'User' => 'Anonymous (not verified)',
             'IP Address' => '127.0.0.1',
-            'Referer' => $form_url, 
+            'Referer' => $form_url,
             'External referer' => '',
-            'Form URL' => $form_url, 
-            'Tags' => '', 
-            'Entry URL' => $form_url,  
+            'Form URL' => $form_url,
+            'Tags' => '',
+            'Entry URL' => $form_url,
             'Source' => '',
             'Channel' => '',
             'Version' => '',
