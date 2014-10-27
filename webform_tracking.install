@@ -112,13 +112,12 @@ function webform_tracking_schema() {
         ),
       ),
       'primary key' => array('nid', 'sid'),
+      'indexes' => array('webform_submission_sid' => array('sid')),
     ),
   );
 }
 
 /**
- * Implements hook_update_n().
- *
  * Enable session_cache module as replacement for core caching.
  */
 function webform_tracking_update_1() {
@@ -126,8 +125,6 @@ function webform_tracking_update_1() {
 }
 
 /**
- * Implements hook_update_n().
- *
  * Add fields for additional tracking data.
  */
 function webform_tracking_update_2() {
@@ -177,8 +174,6 @@ function webform_tracking_update_2() {
 
 
 /**
- * Implements hook_update_n().
- *
  * Rename fields for spelling and consistency reasons.
  */
 function webform_tracking_update_3() {
@@ -208,8 +203,6 @@ function webform_tracking_update_3() {
 }
 
 /**
- * Implements hook_update_n().
- *
  * Add a field for the users country. Function depends on geoip PECL module.
  */
 function webform_tracking_update_4() {
@@ -238,8 +231,6 @@ function webform_tracking_update_5() {
 }
 
 /**
- * Implements hook_update_n().
- *
  * Even more data to track. Term & Campaign.
  */
 function webform_tracking_update_6() {
@@ -255,4 +246,11 @@ function webform_tracking_update_6() {
     'length'      => '1024',
     'not null'    => FALSE,
   ));
+}
+
+/**
+ * Add index on webform_tracking.sid
+ */
+function webform_tracking_update_7() {
+  db_add_index('webform_tracking', 'webform_submission_sid', array('sid'));
 }
