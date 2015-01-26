@@ -110,6 +110,12 @@ function webform_tracking_schema() {
           'length'      => '1024',
           'not null'    => FALSE,
         ),
+        'refsid' => array(
+          'description' => 'referring submission identifier',
+          'type'        => 'int',
+          'unsigned'    => TRUE,
+          'not null'    => FALSE,
+        ),
       ),
       'primary key' => array('nid', 'sid'),
       'indexes' => array('webform_submission_sid' => array('sid')),
@@ -253,4 +259,16 @@ function webform_tracking_update_6() {
  */
 function webform_tracking_update_7() {
   db_add_index('webform_tracking', 'webform_submission_sid', array('sid'));
+}
+
+/**
+ * Add field for referring sid.
+ */
+function webform_tracking_update_8() {
+  db_add_field('webform_tracking', 'refsid', array(
+    'description' => 'referring submission identifier',
+    'type'        => 'int',
+    'unsigned'    => TRUE,
+    'not null'    => FALSE,
+  ));
 }

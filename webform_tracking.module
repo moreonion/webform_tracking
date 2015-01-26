@@ -139,6 +139,10 @@ function webform_tracking_boot() {
         session_cache_set('webform_tracking_' . $name, check_plain($value));
       }
     }
+
+    if (!empty($_GET['refsid'])) {
+      session_cache_set('webform_tracking_' . 'refsid', (int)check_plain($_GET['refsid']));
+    }
   }
 }
 
@@ -179,6 +183,7 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     'country' => '',
     'term' => '',
     'campaign' => '',
+    'refsid' => '',
   );
   foreach ($parameters as $name => $value) {
     $parameters[$name] = session_cache_get('webform_tracking_' . $name);
@@ -255,6 +260,7 @@ function webform_tracking_webform_results_download_submission_information_info()
     $p . 'form_url' => t('Form URL'),
     $p . 'tags' => t('Tags'),
     $p . 'entry_url' => t('Entry URL'),
+    $p . 'refsid' => t('Referring SID'),
     $p . 'source' => t('Source'),
     $p . 'medium' => t('Channel'),
     $p . 'version' => t('Version'),
