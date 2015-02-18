@@ -194,6 +194,7 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     }
     session_cache_set('webform_tracking_' . $name, NULL);
   }
+  $parameters['refsid'] = $parameters['refsid'] ? (int) $parameters['refsid'] : NULL;
 
   $history = session_cache_get('webform_tracking_history');
   $length = count($history);
