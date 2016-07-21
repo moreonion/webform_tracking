@@ -106,7 +106,12 @@ function webform_tracking_boot() {
     if (function_exists('geoip_country_code_by_name')) {
       // Use @, see: https://bugs.php.net/bug.php?id=59753
       $country = @geoip_country_code_by_name(ip_address());
-      session_cache_set('webform_tracking_country', $country);
+
+      include_once DRUPAL_ROOT . '/includes/locale.inc';
+      $countries = country_get_list();
+      if (isset($countries[$country])) {
+        session_cache_set('webform_tracking_country', $country);
+      }
     }
 
     $extra_parameters = array(
