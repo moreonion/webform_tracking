@@ -80,7 +80,8 @@ function webform_tracking_load($submissions) {
  */
 function webform_tracking_webform_submission_insert($node, $submission) {
   $parameters = array(
-    'tags' => '',
+    'user_id' => '',
+    'tags' => [],
     'external_referer' => '',
     'source' => '',
     'medium' => '',
@@ -92,27 +93,31 @@ function webform_tracking_webform_submission_insert($node, $submission) {
   );
 
   $cookie_data = drupal_json_decode($_COOKIE['webform_tracking']);
-  setcookie('webform_tracking', drupal_json_encode(array(
-        'user_id' => $cookie_data['user_id'])));
 
   foreach ($parameters as $name => $value) {
-    $parameters[$name] = isset($cookie_data[$name]) ? $cookie_data[$name]: '';
-
-    if (!is_array($parameters[$name])) {
-      $parameters[$name] = check_plain($parameters[$name]);
+    if ($name != 'tags') {
+      if (isset($cookie_data[$name]) && !is_array($cookie_data[$name])) {
+        $parameters[$name] = check_plain($cookie_data[$name]);
+      }
     }
-    else {
-      foreach ($parameters[$name] as $key => $value) {
-        $parameters[$name][$key] = check_plain($value);
+  }
+  if (isset($cookie_data['tags']) && is_array($cookie_data['tags'])) {
+    foreach ($cookie_data['tags'] as $t) {
+      if (!is_array($t)) {
+        $parameters['tags'][] = $t;
       }
     }
   }
 
-  $parameters['tags'] = serialize($parameters['tags']);
-
+  $parameters['tags'] = serialize(array_unique($parameters['tags']));
   $server_data = array(
-    'ip_address' => ip_address()
+    'ip_address' => ip_address(),
+    'country' => NULL,
   );
+
+  if (!$parameters['user_id']) {
+    $parameters['user_id'] = hash('adler32', rand() . microtime());
+  }
 
   if (function_exists('geoip_country_code_by_name')) {
     // Use @, see: https://bugs.php.net/bug.php?id=59753
@@ -120,25 +125,41 @@ function webform_tracking_webform_submission_insert($node, $submission) {
   }
   $parameters['refsid'] = $parameters['refsid'] ? (int) $parameters['refsid'] : NULL;
 
-  $history = isset($cookie_data['history']) ? $cookie_data['history'] : array('');
+  $history = [];
+  if (isset($cookie_data['history'])) {
+    foreach ($cookie_data['history'] as $url) {
+      if (!is_array($url)) {
+        $history[] = check_plain($url);
+      }
+    }
+  }
+  if (!$history) {
+    $history[] = url(NULL, [
+      'absolute' => TRUE,
+      'query' => drupal_get_query_parameters(),
+    ]);
+  }
   $length = count($history);
 
   $urls = array(
     'entry_url' => $history[0],
     // The only situation when $history should be < 3 appears if the user opens
     // the form directly, in this case referer and form_url are the same.
-    'referer'   => isset($history[$length - 3]) ? $history[$length - 3] : $history[0],
-    'form_url'  => isset($history[$length - 2]) ? $history[$length - 2] : $history[0],
+    'referer'   => $length >= 3 ? $history[$length - 3] : $history[0],
+    'form_url'  => $length >= 2 ? $history[$length - 2] : $history[0],
   );
 
   $data = array(
     'nid' => $submission->nid,
     'sid' => $submission->sid,
-    'user_id' => $cookie_data['user_id'],
   ) + $urls + $parameters + $server_data;
   $submission->tracking = (object) $data;
 
   db_insert('webform_tracking')->fields($data)->execute();
+
+  setcookie('webform_tracking', drupal_json_encode([
+    'user_id' => $parameters['user_id'],
+  ]));
 }
 
 /**
