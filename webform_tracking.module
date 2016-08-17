@@ -67,7 +67,10 @@ function webform_tracking_webform_submission_insert($node, $submission) {
     'refsid' => '',
   );
 
-  $cookie_data = drupal_json_decode($_COOKIE['webform_tracking']);
+  $cookie_data = [];
+  if (isset($_COOKIE['webform_tracking'])) {
+    $cookie_data = drupal_json_decode($_COOKIE['webform_tracking']);
+  }
 
   foreach ($parameters as $name => $value) {
     if ($name != 'tags') {
