@@ -127,6 +127,7 @@ Drupal.behaviors.webform_tracking = {
     if (!array.length) {
       return array;
     }
+    array = array.sort(function (a, b) { return a - b; });
     var result = [array[0]];
     for (var i = 1; i < array.length; i++) {
       if (array[i-1] !== array[i]) {
