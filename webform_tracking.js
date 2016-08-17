@@ -18,6 +18,13 @@ Drupal.behaviors.webform_tracking = {
   },
 
   attach: function(context) {
+    // Run only once per page-load.
+    if (context == document) {
+      this.run();
+    }
+  },
+
+  run: function() {
     var tracking_data = JSON.parse($.cookie('webform_tracking')) || {};
     var parameters = this.get_url_parameters();
     var base_url = Drupal.settings.webform_tracking.base_url;
