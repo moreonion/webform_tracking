@@ -5,3 +5,4 @@ core = 7.x
 
 dependencies[] = webform
 
+scripts[] = webform_tracking.js
