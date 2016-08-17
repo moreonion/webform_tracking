@@ -84,21 +84,19 @@ Drupal.behaviors.webform_tracking = {
     // history
     var history = tracking_data.history || [];
     var path = parameters.q || window.location.pathname.substr(1);
-    if (path !== 'system/ajax') { // works with webform_ajax.
-      var length = history.push(base_url + '/' + path);
-      if (length > 10) {
-        // If the history is getting too long, we need at least the
-        // following:
-        // [0] is the entry page
-        // [-3] might be the last page before the form == referer
-        // [-2] might be the form
-        // [-1] might be the forms /done page
-        // 10 is an arbitrary value, you just might want to avoid
-        // calling the array functions below on every request if not
-        // necessary.
-        history = [history[0]];
-        $.merge(history, history.slice(-3));
-      }
+    var length = history.push(base_url + '/' + path);
+    if (length > 10) {
+      // If the history is getting too long, we need at least the
+      // following:
+      // [0] is the entry page
+      // [-3] might be the last page before the form == referer
+      // [-2] might be the form
+      // [-1] might be the forms /done page
+      // 10 is an arbitrary value, you just might want to avoid
+      // calling the array functions below on every request if not
+      // necessary.
+      history = [history[0]];
+      $.merge(history, history.slice(-3));
     }
     tracking_data.history = history;
 
