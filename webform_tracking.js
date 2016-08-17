@@ -124,6 +124,9 @@ Drupal.behaviors.webform_tracking = {
   },
 
   sort_unique: function(array) {
+    if (!array.length) {
+      return array;
+    }
     array = array.sort(function (a, b) { return a - b; });
     var result = [array[0]];
     for (var i = 1; i < array.length; i++) {
