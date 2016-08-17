@@ -31,7 +31,7 @@ Drupal.behaviors.webform_tracking = {
 
     var dnt = window.navigator.doNotTrack;
     var respect_dnt = Drupal.settings.webform_tracking.respect_dnt;
-    if (dnt === "yes" || dnt == "1" || !respect_dnt) {
+    if ((dnt === "yes" || dnt == "1") && respect_dnt) {
       return;
     }
 
