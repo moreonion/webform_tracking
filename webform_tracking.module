@@ -59,7 +59,7 @@ function webform_tracking_webform_submission_insert($node, $submission) {
   $user_id = Extractor::fromEnv()->saveVars($submission);
   setcookie('webform_tracking', drupal_json_encode([
     'user_id' => $user_id,
-  ]));
+  ]), 0, '/');
 }
 
 /**

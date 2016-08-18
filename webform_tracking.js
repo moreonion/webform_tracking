@@ -113,7 +113,7 @@ Drupal.behaviors.webform_tracking = {
     // history
     this.history_add(tracking_data.history, window.location.href);
 
-    $.cookie('webform_tracking', JSON.stringify(tracking_data));
+    $.cookie('webform_tracking', JSON.stringify(tracking_data), {path: '/'});
   },
 
   get_url_parameters: function() {
