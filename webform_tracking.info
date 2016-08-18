@@ -3,6 +3,7 @@ description = Tracks and tags webform submissions
 package = Webform
 core = 7.x
 
+dependencies[] = psr0
 dependencies[] = webform
 
 scripts[] = webform_tracking.js
