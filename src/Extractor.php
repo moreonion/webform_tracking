@@ -90,8 +90,8 @@ class Extractor {
       'entry_url' => $history[0],
       // The only situation when $history should be < 3 appears if the user opens
       // the form directly, in this case referer and form_url are the same.
-      'referer'   => $length >= 2 ? $history[$length - 2] : $history[0],
-      'form_url'  => $length >= 1 ? $history[$length - 1] : $history[0],
+      'referer'   => $history[max(0, $length - 2)],
+      'form_url'  => $history[max(0, $length - 1)],
     ];
   }
 
