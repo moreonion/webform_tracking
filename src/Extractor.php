@@ -39,7 +39,13 @@ class Extractor {
   protected function getCountry($ip) {
     if (function_exists('geoip_country_code_by_name')) {
       // Use @, see: https://bugs.php.net/bug.php?id=59753
-      return @geoip_country_code_by_name($ip);
+      $country = @geoip_country_code_by_name($ip);
+
+      // Check if this really is a ISO country code.
+      include_once DRUPAL_ROOT . '/includes/locale.inc';
+      if (isset(country_get_list()[$country])) {
+        return $country;
+      }
     }
   }
 
