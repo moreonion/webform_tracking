@@ -82,6 +82,9 @@ function webform_tracking_webform_submission_load(&$submissions) {
   if (empty($sids)) {
     return;
   }
+  foreach ($submissions as $submission) {
+    $submission->tracking = (object) [];
+  }
   $result = db_select('webform_tracking', 't')
     ->fields('t')
     ->condition('sid', $sids, 'IN')
