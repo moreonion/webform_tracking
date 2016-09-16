@@ -95,7 +95,7 @@ Drupal.behaviors.webform_tracking = {
     tracking_data.tags = this.sort_unique(tags);
 
     // extra parameters
-    $.merge(tracking_data, this.extract_parameters(parameters));
+    $.extend(tracking_data, this.extract_parameters(parameters));
 
     // If the referer does not start with $base_url, it's external but we
     // only take the first external referer to avoid problems with off-site
