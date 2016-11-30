@@ -57,9 +57,13 @@ function webform_tracking_init() {
  */
 function webform_tracking_webform_submission_insert($node, $submission) {
   $user_id = Extractor::fromEnv()->saveVars($submission);
-  setcookie('webform_tracking', drupal_json_encode([
-    'user_id' => $user_id,
-  ]), 0, '/');
+  // Set user_id cookie if possible. hook_webform_submission_insert() can be
+  // triggered in all kinds of situations not only on form submits.
+  if (!headers_sent()) {
+    setcookie('webform_tracking', drupal_json_encode([
+      'user_id' => $user_id,
+    ]), 0, '/');
+  }
 }
 
 /**
