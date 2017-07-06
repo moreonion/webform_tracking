@@ -101,6 +101,12 @@ class Extractor {
     ];
   }
 
+  /**
+   * Save tracking variables for a submission.
+   *
+   * @return array
+   *   The updated cookie data.
+   */
   public function saveVars($submission) {
     $cookie_data = $this->cookieData + [
       'history' => [],
@@ -123,6 +129,7 @@ class Extractor {
     $submission->tracking = (object) $data;
 
     db_insert('webform_tracking')->fields($data)->execute();
-    return $parameters['user_id'];
+    $cookie_data['user_id'] = $parameters['user_id'];
+    return $cookie_data;
   }
 }
