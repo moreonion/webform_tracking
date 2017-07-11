@@ -2,10 +2,8 @@ Webform tracking
 ================
 
 ...collects data about your users and associates it with their
-[webform](https://drupal.org/project/webform) submissions. It uses
-[session_cache](https://drupal.org/project/session_cache) and `hook_boot` to
-avoid interference with Drupals page cache. If you want to actually see the
-resulting data you need to apply the patch in
+[webform](https://drupal.org/project/webform) submissions. If you want to
+actually see the resulting data you need to apply the patch in
 [#2117285](https://drupal.org/node/2117285), to webform (or implement a better
 solution ;))
 
