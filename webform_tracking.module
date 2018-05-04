@@ -26,6 +26,19 @@ function webform_tracking_form_webform_admin_settings_alter(&$form, &$form_state
     '#default_value' => variable_get('webform_tracking_respect_dnt', TRUE),
   );
 
+  $form['webform_tracking']['webform_tracking_track_ip_address'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Record the IP address'),
+    '#default_value' => variable_get('webform_tracking_track_ip_address', FALSE),
+  );
+
+  $form['webform_tracking']['webform_tracking_significant_ip_address_bits'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Significant bits in anonymized IP addresses'),
+    '#description' => t('Use a range of 0 to 32. 0 meaning that 0.0.0.0 is the only IP address every recorded, 16 meaning the first "half" of the IP address is recorded, and 32 meaning the full IP address is recorded. This is supposed to only work with IPv4.'),
+    '#default_value' => variable_get('webform_tracking_significant_ip_address_bits', 16),
+  );
+
   array_unshift($form['#submit'], 'webform_tracking_webform_admin_settings_submit');
 }
 
@@ -34,6 +47,12 @@ function webform_tracking_form_webform_admin_settings_alter(&$form, &$form_state
  */
 function webform_tracking_webform_admin_settings_submit(&$form, &$form_state) {
   variable_set('webform_tracking_respect_dnt', $form_state['values']['webform_tracking_respect_dnt']);
+  variable_set('webform_tracking_track_ip_address', $form_state['values']['webform_tracking_track_ip_address']);
+  // cast to a number, update the form_state so that submit handlers after us
+  // see the same value
+  $bits = (int) $form_state['values']['webform_tracking_significant_ip_address_bits'];
+  $form_state['values']['webform_tracking_significant_ip_address_bits'] = $bits;
+  variable_set('webform_tracking_significant_ip_address_bits', $bits);
 }
 
 /**

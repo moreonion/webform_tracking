@@ -36,6 +36,36 @@ class Extractor {
     return ip_address();
   }
 
+  /**
+   * Returns a trimmed IP address.
+   *
+   * Trims the rightmost bits to anonymize an IP address.
+   *
+   * If an invalid IP address is given, return '0.0.0.0'.
+   */
+  protected function filterIP($ip_address, $significant_bits = 16) {
+    if (!variable_get('webform_tracking_track_ip_address', FALSE)) {
+      return '';
+    }
+
+    if ($significant_bits > 32) {
+      $significant_bits = 32;
+    }
+    elseif ($significant_bits < 0) {
+      $significant_bits = 0;
+    }
+    // construct an integer with all x bits set to 1, then shift left the
+    // difference to fill right with 0
+    $bitmask = (2**$significant_bits - 1) << (32 - $significant_bits);
+    $ip_as_long = ip2long($ip_address);
+    // when the IP is invalid
+    if ($ip_as_long === FALSE) {
+      return '0.0.0.0';
+    }
+    $trimmed_ip = long2ip($ip_as_long & $bitmask);
+    return $trimmed_ip;
+  }
+
   protected function getCountry($ip) {
     if (function_exists('geoip_country_code_by_name')) {
       // Use @, see: https://bugs.php.net/bug.php?id=59753
@@ -115,8 +145,9 @@ class Extractor {
     $parameters = $this->extractParameters($cookie_data);
 
     $ip = $this->getIP();
+    $significant_bits = (int) variable_get('webform_tracking_significant_ip_address_bits', 16);
     $server_data = array(
-      'ip_address' => $ip,
+      'ip_address' => $this->filterIP($ip, $significant_bits),
       'country' => $this->getCountry($ip),
     );
 
