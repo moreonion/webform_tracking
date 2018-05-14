@@ -32,10 +32,6 @@ class Extractor {
     $this->query = $query;
   }
 
-  protected function getIP() {
-    return ip_address();
-  }
-
   protected function getCountry($ip) {
     if (function_exists('geoip_country_code_by_name')) {
       // Use @, see: https://bugs.php.net/bug.php?id=59753
@@ -114,10 +110,8 @@ class Extractor {
 
     $parameters = $this->extractParameters($cookie_data);
 
-    $ip = $this->getIP();
     $server_data = array(
-      'ip_address' => $ip,
-      'country' => $this->getCountry($ip),
+      'country' => $this->getCountry($submission->remote_addr),
     );
 
     $urls = $this->urls($cookie_data['history']);
