@@ -50,12 +50,6 @@ function webform_tracking_schema() {
           'size'      => 'medium',
           'not null'    => FALSE,
         ),
-        'ip_address' => array(
-          'description' => 'The submitting IP address.',
-          'type'        => 'text',
-          'size'      => 'small',
-          'not null'    => FALSE,
-        ),
         'entry_url'  => array(
           'description' => 'first page a user visited',
           'type'        => 'text',
@@ -271,4 +265,11 @@ function webform_tracking_update_8() {
     'unsigned'    => TRUE,
     'not null'    => FALSE,
   ));
+}
+
+/**
+ * Remove IP-address from tracking data.
+ */
+function webform_tracking_update_9() {
+  db_drop_field('webform_tracking', 'ip_address');
 }
