@@ -85,7 +85,7 @@ function webform_tracking_webform_submission_load(&$submissions) {
     return;
   }
   foreach ($submissions as $submission) {
-    $submission->tracking = (object) [];
+    $submission->tracking = (object) Extractor::$parameters;
   }
   $result = db_select('webform_tracking', 't')
     ->fields('t')
