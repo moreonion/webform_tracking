@@ -111,7 +111,7 @@ class Extractor {
     $parameters = $this->extractParameters($cookie_data);
 
     $server_data = array(
-      'country' => $this->getCountry($submission->remote_addr),
+      'country' => $this->getCountry(ip_address()),
     );
 
     $urls = $this->urls($cookie_data['history']);
