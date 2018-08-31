@@ -56,7 +56,9 @@ function webform_tracking_init() {
  * Save tracking data along with the submission and update the cookie content.
  */
 function webform_tracking_webform_submission_insert($node, $submission) {
-  $cookie = Extractor::fromEnv()->saveVars($submission);
+  $extractor = Extractor::fromEnv();
+  $cookie = $extractor->addTrackingData($submission);
+  $extractor->insert($submission);
   // Set new cookie data if possible. hook_webform_submission_insert() can be
   // triggered in all kinds of situations not only on form submits.
   if (!headers_sent()) {
