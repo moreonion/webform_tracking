@@ -27,7 +27,7 @@ class Extractor {
     return new static($cookie_data, drupal_get_query_parameters());
   }
 
-  public function __construct($cookie_data, $query) {
+  public function __construct(array $cookie_data, array $query) {
     $this->cookieData = $cookie_data;
     $this->query = $query;
   }
@@ -98,12 +98,15 @@ class Extractor {
   }
 
   /**
-   * Save tracking variables for a submission.
+   * Add tracking data to a submission object.
+   *
+   * @param object $submission
+   *   The submisson that gets the data added to.
    *
    * @return array
    *   The updated cookie data.
    */
-  public function saveVars($submission) {
+  public function addTrackingData($submission) {
     $cookie_data = $this->cookieData + [
       'history' => [],
     ];
@@ -111,7 +114,7 @@ class Extractor {
     $parameters = $this->extractParameters($cookie_data);
 
     $server_data = array(
-      'country' => $this->getCountry($submission->remote_addr),
+      'country' => $this->getCountry(ip_address()),
     );
 
     $urls = $this->urls($cookie_data['history']);
@@ -122,8 +125,19 @@ class Extractor {
     ) + $urls + $parameters + $server_data;
     $submission->tracking = (object) $data;
 
-    db_insert('webform_tracking')->fields($data)->execute();
     $cookie_data['user_id'] = $parameters['user_id'];
     return $cookie_data;
   }
+
+  /**
+   * Insert tracking data for a submission.
+   *
+   * @param object $submission
+   *   The submission object.
+   */
+  public function insert($submission) {
+    $data = (array) $submission->tracking;
+    db_insert('webform_tracking')->fields($data)->execute();
+  }
+
 }
