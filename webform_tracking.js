@@ -75,7 +75,7 @@ Drupal.behaviors.webform_tracking = {
     var tracking_data = $.extend({
       history: [],
       tags: [],
-    }, JSON.parse($.cookie('webform_tracking')) || {});
+    }, JSON.parse($.cookie('webform_tracking') || '{}'));
     var parameters = this.get_url_parameters();
     var base_url = Drupal.settings.webform_tracking.base_url;
 
