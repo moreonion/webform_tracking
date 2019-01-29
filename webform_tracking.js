@@ -72,10 +72,16 @@ Drupal.behaviors.webform_tracking = {
   },
 
   run: function() {
+    var cookie_data;
+    try {
+      cookie_data = JSON.parse($.cookie('webform_tracking') || '{}');
+    } catch(err) {
+      cookie_data = {};
+    }
     var tracking_data = $.extend({
       history: [],
       tags: [],
-    }, JSON.parse($.cookie('webform_tracking')) || {});
+    }, cookie_data);
     var parameters = this.get_url_parameters();
     var base_url = Drupal.settings.webform_tracking.base_url;
 
