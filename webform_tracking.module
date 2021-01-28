@@ -26,14 +26,22 @@ function webform_tracking_form_webform_admin_settings_alter(&$form, &$form_state
     '#default_value' => variable_get('webform_tracking_respect_dnt', TRUE),
   );
 
+  $form['webform_tracking']['webform_tracking_wait_for_event'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Wait for a specific event'),
+    '#description' => t('Only start tracking after a JS event with this name has been triggerd, e.g. by a cookie bar. Leave empty to track immediately.'),
+    '#default_value' => variable_get('webform_tracking_wait_for_event', ''),
+  );
+
   array_unshift($form['#submit'], 'webform_tracking_webform_admin_settings_submit');
 }
 
 /**
- * Submit handler to set the variable 'webform_tracking_respect_dnt'.
+ * Submit handler to set the variable webform_tracking variables.
  */
 function webform_tracking_webform_admin_settings_submit(&$form, &$form_state) {
   variable_set('webform_tracking_respect_dnt', $form_state['values']['webform_tracking_respect_dnt']);
+  variable_set('webform_tracking_wait_for_event', $form_state['values']['webform_tracking_wait_for_event']);
 }
 
 /**
@@ -45,6 +53,7 @@ function webform_tracking_init() {
   drupal_add_library('system', 'jquery.cookie', TRUE);
   $settings['webform_tracking'] = [
     'respect_dnt' => variable_get('webform_tracking_respect_dnt', TRUE),
+    'wait_for_event' => variable_get('webform_tracking_wait_for_event', ''),
     'base_url' => $GLOBALS['base_url'],
   ];
   drupal_add_js($settings, ['type' => 'setting', 'every_page' => TRUE]);
@@ -61,7 +70,8 @@ function webform_tracking_webform_submission_insert($node, $submission) {
   $extractor->insert($submission);
   // Set new cookie data if possible. hook_webform_submission_insert() can be
   // triggered in all kinds of situations not only on form submits.
-  if (!headers_sent()) {
+  // If no cookie exists yet, we have to assume that cookies are not allowed.
+  if (!headers_sent() && isset($_COOKIE['webform_tracking'])) {
     setcookie('webform_tracking', drupal_json_encode($cookie), 0, '/');
   }
 }
