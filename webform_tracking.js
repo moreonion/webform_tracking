@@ -20,7 +20,20 @@ Drupal.behaviors.webform_tracking = {
 
   attach: function(context) {
     // Run only once per page-load.
-    if (context == document) {
+    if (context !== document) {
+      return;
+    }
+    // Run only with consent.
+    var dnt = window.navigator.doNotTrack;
+    var respect_dnt = Drupal.settings.webform_tracking.respect_dnt;
+    if ((dnt === "yes" || dnt == "1") && respect_dnt) {
+      return;
+    }
+    var event = Drupal.settings.webform_tracking.wait_for_event;
+    if (event) {
+      document.addEventListener(event, this.run.bind(this), false);
+    }
+    else {
       this.run();
     }
   },
@@ -84,12 +97,6 @@ Drupal.behaviors.webform_tracking = {
     }, cookie_data);
     var parameters = this.get_url_parameters();
     var base_url = Drupal.settings.webform_tracking.base_url;
-
-    var dnt = window.navigator.doNotTrack;
-    var respect_dnt = Drupal.settings.webform_tracking.respect_dnt;
-    if ((dnt === "yes" || dnt == "1") && respect_dnt) {
-      return;
-    }
 
     tracking_data.user_id = tracking_data.user_id || this.new_user_id();
 
