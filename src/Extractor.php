@@ -61,7 +61,7 @@ class Extractor {
         }
       }
     }
-    $parameters['tags'] = serialize(array_unique($parameters['tags']));
+    $parameters['tags'] = array_unique($parameters['tags']);
 
     if (!$parameters['user_id']) {
       $parameters['user_id'] = hash('adler32', rand() . microtime());
@@ -137,6 +137,7 @@ class Extractor {
    */
   public function insert($submission) {
     $data = (array) $submission->tracking;
+    $data['tags'] = serialize($data['tags']);
     db_insert('webform_tracking')->fields($data)->execute();
   }
 
