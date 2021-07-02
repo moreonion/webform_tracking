@@ -10,20 +10,6 @@ use Upal\DrupalUnitTestCase;
 class WebformTest extends DrupalUnitTestCase {
 
   /**
-   * Test getting the submission data with the patch from #2117285.
-   *
-   * @link https://www.drupal.org/node/2117285 #2117285 @endlink
-   */
-  public function testSubmissionDataWith2117285() {
-    $submission = (object) ['tracking' => []];
-    $submission->tracking['tags'] = ['foo', 'bar', 'baz'];
-    $data = webform_tracking_webform_results_download_submission_information_data($submission, [], 0, 1);
-    $this->assertEqual([
-      'webform_tracking_tags' => 'foo, bar, baz',
-    ], $data);
-  }
-
-  /**
    * Test getting the submission data with the patch from #3086038.
    *
    * @link https://www.drupal.org/node/3086038 #3086038 @endlink
