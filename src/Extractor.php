@@ -50,18 +50,18 @@ class Extractor {
     foreach (static::$parameters as $name => $default) {
       if ($name != 'tags') {
         if (isset($data[$name]) && !is_array($data[$name])) {
-          $parameters[$name] = check_plain($data[$name]);
+          $parameters[$name] = $data[$name];
         }
       }
     }
     if (isset($data['tags']) && is_array($data['tags'])) {
       foreach ($data['tags'] as $t) {
         if (!is_array($t)) {
-          $parameters['tags'][] = check_plain($t);
+          $parameters['tags'][] = $t;
         }
       }
     }
-    $parameters['tags'] = serialize(array_unique($parameters['tags']));
+    $parameters['tags'] = array_unique($parameters['tags']);
 
     if (!$parameters['user_id']) {
       $parameters['user_id'] = hash('adler32', rand() . microtime());
@@ -76,7 +76,7 @@ class Extractor {
     if ($cookie_history) {
       foreach ($cookie_history as $url) {
         if (!is_array($url)) {
-          $history[] = check_plain($url);
+          $history[] = $url;
         }
       }
     }
@@ -137,6 +137,7 @@ class Extractor {
    */
   public function insert($submission) {
     $data = (array) $submission->tracking;
+    $data['tags'] = serialize($data['tags']);
     db_insert('webform_tracking')->fields($data)->execute();
   }
 

@@ -38,4 +38,16 @@ class ExtractorTest extends \DrupalUnitTestCase {
     $extractor->addTrackingData($submission);
   }
 
+  /**
+   * Test data is not escaped when extracting.
+   */
+  public function testExtractParametersNoEscaping() {
+    $extractor = new Extractor([], []);
+    $data['tags'][] = 'no=escaping%in>tags';
+    $data['medium'] = 'no=escaping%in>other-params';
+    $params = $extractor->extractParameters($data);
+    $this->assertEqual($data['tags'], $params['tags']);
+    $this->assertEqual($data['medium'], $params['medium']);
+  }
+
 }
